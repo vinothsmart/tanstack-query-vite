@@ -3,13 +3,26 @@ import { memo, useEffect, useState } from "react";
 const POSTS_URL = "http://jsonplaceholder.typicode.com/posts?_limit=5";
 
 const QueryExample = () => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<
+    { id: number; title: string; body: string }[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const response = await fetch(POSTS_URL);
-      const data = await response.json();
-      setPosts(data);
+      try {
+        const response = await fetch(POSTS_URL);
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchPosts();
   }, []);
@@ -21,7 +34,9 @@ const QueryExample = () => {
         This is our first example of using TanStack Query in a React
         application.
       </p>
-      {posts.map((post: any) => (
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error: {error.message}</p>}
+      {posts.map((post: { id: number; title: string; body: string }) => (
         <div key={post.id} className="card">
           <h3>{post.title}</h3>
           <p>{post.body}</p>
