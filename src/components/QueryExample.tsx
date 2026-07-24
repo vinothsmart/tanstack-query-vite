@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { memo } from "react";
 
-const POSTS_URL = "http://jsonplaceholder.typicode.com/posts?_limit=5";
+const POSTS_URL = "http://jsonplaceholder.typicode.com/postss?_limit=5";
 
 const fetchPosts = async () => {
   const response = await fetch(POSTS_URL);
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
   return await response.json();
 };
 
@@ -36,7 +39,7 @@ const QueryExample = () => {
         application.
       </p>
       {isLoading && <p>Loading...</p>}
-      {error && <p>Sorry, we couldn't find the requested posts.</p>}
+      {error && <p>Error: {error.message}</p>}
       {posts?.map((post: { id: number; title: string; body: string }) => (
         <div key={post.id} className="card">
           <h3>{post.title}</h3>
