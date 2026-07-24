@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { memo } from "react";
+import { memo, useCallback, useState } from "react";
 
-const POSTS_URL = "http://jsonplaceholder.typicode.com/postss?_limit=5";
+const POSTS_URL = "http://jsonplaceholder.typicode.com/posts?_limit=5";
 
 const fetchPosts = async () => {
   const response = await fetch(POSTS_URL);
@@ -12,24 +12,26 @@ const fetchPosts = async () => {
 };
 
 const QueryExample = () => {
+  const [isLoadData, setIsLoadData] = useState(false);
+
+  const handleLoadData = useCallback(() => {
+    setIsLoadData(true);
+  }, []);
+
   const {
     data: posts,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["posts"],
     queryFn: fetchPosts,
+    enabled: isLoadData,
   });
 
-  //   const {
-  //     isPending,
-  //     isError,
-  //     data: posts,
-  //     error,
-  //   } = useQuery({
-  //     queryKey: ["posts"],
-  //     queryFn: fetchPosts,
-  //   });
+  const handleRefetch = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   return (
     <div className="section">
@@ -40,6 +42,8 @@ const QueryExample = () => {
       </p>
       {isLoading && <p>Loading...</p>}
       {error && <p>Error: {error.message}</p>}
+      <button onClick={handleLoadData}>Load Data</button>
+      <button onClick={handleRefetch}>Refetch</button>
       {posts?.map((post: { id: number; title: string; body: string }) => (
         <div key={post.id} className="card">
           <h3>{post.title}</h3>
