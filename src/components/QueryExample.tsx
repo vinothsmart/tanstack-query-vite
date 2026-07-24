@@ -1,31 +1,32 @@
-import { memo, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { memo } from "react";
 
 const POSTS_URL = "http://jsonplaceholder.typicode.com/posts?_limit=5";
 
-const QueryExample = () => {
-  const [posts, setPosts] = useState<
-    { id: number; title: string; body: string }[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+const fetchPosts = async () => {
+  const response = await fetch(POSTS_URL);
+  return await response.json();
+};
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch(POSTS_URL);
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        setPosts(data);
-      } catch (error) {
-        setError(error as Error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchPosts();
-  }, []);
+const QueryExample = () => {
+  const {
+    data: posts,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["posts"],
+    queryFn: fetchPosts,
+  });
+
+  //   const {
+  //     isPending,
+  //     isError,
+  //     data: posts,
+  //     error,
+  //   } = useQuery({
+  //     queryKey: ["posts"],
+  //     queryFn: fetchPosts,
+  //   });
 
   return (
     <div className="section">
@@ -35,8 +36,8 @@ const QueryExample = () => {
         application.
       </p>
       {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
-      {posts.map((post: { id: number; title: string; body: string }) => (
+      {error && <p>Sorry, we couldn't find the requested posts.</p>}
+      {posts?.map((post: { id: number; title: string; body: string }) => (
         <div key={post.id} className="card">
           <h3>{post.title}</h3>
           <p>{post.body}</p>
