@@ -1,8 +1,8 @@
 import "./App.css";
-import QueryExample from "./components/QueryExample";
+import MutationExample from "./components/MutationExample";
 
 function App() {
-  return <QueryExample />;
+  return <MutationExample />;
 }
 
 export default App;
